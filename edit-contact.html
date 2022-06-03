@@ -1,0 +1,184 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>CONTACT BOOK </title>
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <link rel="stylesheet" href="css/custom.css">
+    </head>
+
+    <body onload="getContact()">
+         <header>
+            
+            <div class="d-flex flex-column align-items-center p-3 bg-white border-bottom box-shadow fixed top">
+                <img src="images/images.png" hieght="80"/><img src="images/AdobeStock_91349858.jpg" width="300">
+            </div>
+             
+             <br/><br/>
+             
+        </header>
+        <form id="editForm">
+            <div id="avatarImgLook"></div> 
+            
+            <label for="firstname">First Name</label>
+            <input type="text" name="firstname" id="firstname" readonly><br/>
+
+            <label for="lastname">Last Name</label>
+            <input type="text" name="lastname" id="lastname" readonly><br/>
+
+            <label for="mobile">Mobile</label>
+            <input type="text" name="mobile" id="mobile" readonly><br/>
+
+            <label for="email">Email</label>
+            <input type="text" name="email" id="email" readonly><br/>
+
+            <label for="avatarImg" hidden >Select a file</label>
+            <input type="file" name="avatarImg" id="avatarImg" hidden><br/>
+
+            <button type="submit" id="submitForm" hidden>Submit</button>
+        </form>
+        <br/>
+        <button id="homeLink" type="button">Home</button>
+        <button id="editContact" type="button">Edit</button>
+        <button id="deleteContact" type="button">Delete</button>
+
+        <script src="config.js"></script>
+        <script>
+
+            // creates a event listener for a button
+            document.getElementById("homeLink").addEventListener('click',homeLink);
+            document.getElementById("editContact").addEventListener('click',editContact);
+            document.getElementById("submitForm").addEventListener('click',submitForm);
+            document.getElementById("deleteContact").addEventListener('click',deleteContact);
+
+            var id=getId();
+
+            function getId()
+            {
+                var url=window.location.href;
+                var pos=url.search("=");
+                var id=url.slice(pos+1);
+
+                return id;
+            }
+
+            function getContact()
+            {
+                fetch(rootPath+'controller/get-contacts/?id='+id)
+                .then(function(response){
+                    return response.json();
+                })
+                .then(function(data){
+                    console.log(data);
+                    displayOutput(data);
+                })
+            }
+
+            function homeLink()
+            {
+                window.open("index.html","_self");
+            }
+
+            function displayOutput(data)
+            {
+                avatarImg=`
+                <img src="${rootPath}/controller/uploads/${data[0].avatar}" width="200"/>
+                `
+
+                document.getElementById("avatarImgLook").innerHTML=avatarImg;
+                document.getElementById("firstname").value=data[0].firstname;
+                document.getElementById("lastname").value=data[0].lastname;
+                document.getElementById("mobile").value=data[0].mobile;
+                document.getElementById("email").value=data[0].email;
+
+            }
+
+            function editContact()
+            {
+                document.getElementById("firstname").readOnly= false;
+                document.getElementById("lastname").readOnly= false;
+                document.getElementById("mobile").readOnly= false;
+                document.getElementById("email").readOnly= false;
+
+                document.getElementById("avatarImg").hidden=false;
+                document.getElementById("submitForm").hidden=false;
+
+                document.getElementById("avatarImgLook").hidden=true;
+                document.getElementById("editContact").hidden=true;
+
+            }
+
+            function submitForm(e)// function to edit the data
+            {
+                e.preventDefault();//preevents the form from reloading the page
+                
+                const form = new FormData(document.querySelector('#editForm'));// collects the data from the form
+                form.append('apiKey',apiKey);
+                form.append('id',id);
+                console.log("abc");
+
+                fetch(rootPath + 'controller/edit-contact/',{//server location
+                    method:'POST',
+                    headers:{'Accept':'application/json, *.*'},
+                    body:form
+                    
+                })
+                
+                .then(function(response)
+                {
+                    return response.text();
+                    console.log(response.text());
+                })
+                .then(function(data){// checks if the edit was successful
+                    if(data=="1")
+                    {
+                        alert("Contact edit.");
+                        homeLink();
+                    }
+                    else{
+                        alert(data);
+                        console.log(data);
+                    }
+                })
+
+                document.getElementById("firstname").readOnly= true;
+                document.getElementById("lastname").readOnly= true;
+                document.getElementById("mobile").readOnly= true;
+                document.getElementById("email").readOnly= true;
+
+                document.getElementById("avatarImg").hidden=true;
+                document.getElementById("submitForm").hidden=true;
+
+                document.getElementById("avatarImgLook").hidden=false;
+                document.getElementById("editContact").hidden=false;
+            }
+
+            function deleteContact()  // the function that deletes the contact
+            {
+                var confirmDelete=confirm("Delete contact. Are you sure?");
+
+                if(confirmDelete==true)
+                {
+                    fetch(rootPath+'controller/delete-contact/?id='+id)// location to the server
+                    .then(function(response)
+                    {
+                        return response.text();
+                        console.log(response.text());
+                        alert(response.text);
+                    })
+                    .then(function(data){// checks if delete was successful 
+                        if(data=="1")
+                        {
+                            homeLink();
+                        }
+                        else{
+                            alert(data);
+                        }
+                    })
+                }
+            }
+
+
+
+        </script>
+    </body>
+</html>

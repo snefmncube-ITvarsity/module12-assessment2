@@ -1,0 +1,82 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Contact Book</title>
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <link rel="stylesheet" href="css/custom.css">
+    </head>
+    
+    <body>
+         <header>
+            
+            <div class="d-flex flex-column align-items-center p-3 bg-white border-bottom box-shadow fixed top">
+                <img src="images/images.png" hieght="80"/><img src="images/AdobeStock_91349858.jpg" width="230">
+            </div>
+        </header>
+        <br/>
+        <form id="editForm">
+           <div id="avatarImage"></div>
+            
+            <br/><br/>
+            <label for="firstname">First Name</label>
+            <input type="text" name="firstname" id="firstname"><br/>
+            <label for="lastname">Last Name</label>
+            <input type="text" name="lastname" id="lastname"><br/>
+            <label for="mobile">Mobile</label>
+            <input type="text" name="mobile" id="mobile"><br/>
+            <label for="email">Email</label>
+            <input type="text" name="email" id="email"><br/>
+            <label for="avatar">Select a file</label>
+            <input type="file" name="avatar" id="avatar"><br/>
+            <button type="submit" id="submitForm">Submit</button>
+        </form>
+        <br/>
+        <button id="homeLink" type="button">Home</button>
+        <script src="config.js"></script>
+        <script>
+            document.getElementById("homeLink").addEventListener('click',homeLink);
+            document.getElementById("submitForm").addEventListener('click',submitForm);
+            
+
+            
+
+            function submitForm(e)// function to add the data
+            {
+                e.preventDefault();// prevents the page fro re-loading
+                
+                const form = new FormData(document.querySelector('#editForm'));
+                form.append('apiKey',apiKey);
+                console.log("abc");
+
+                fetch(rootPath + 'controller/insert-contact/',{//server location
+                    method:'POST',
+                    headers:{'Accept':'application/json, *.*'},
+                    body:form
+                    
+                })
+                
+                .then(function(response)
+                {
+                    return response.text();
+                    console.log(response.text());
+                })
+                .then(function(data){
+                    if(data=="1")// checks if the insert was complete
+                    {
+                        alert("Contact added.");
+                        homeLink();
+                    }
+                    else{
+                        alert(data);
+                        console.log(data);
+                    }
+                })
+            }
+
+            function homeLink()
+            {
+                window.open("index.html","_self");// takes the user to a new page
+            }
+        </script>
+    </body>
+</html>
